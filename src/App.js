@@ -3,7 +3,6 @@ import {
   Container,
   Table
 } from "react-bootstrap";
-import axios from "axios";
 import Airtable from 'airtable';
 import "./App.css"
 
