@@ -1,21 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Container,
-  Table
+  Table,
+  Spinner
 } from "react-bootstrap";
 import Airtable from 'airtable';
+import { getRecords, setLoading } from "./action";
 import "./App.css"
 
 const api_key = "keyr4dEc0VWx0izmh";
 const base = new Airtable({ apiKey: api_key }).base('app5UOoTvlSs4GKCa');
 
 const App = () => {
-  const [records, setRecords] = useState([]);
-  const [sum, setSum] = useState(0);
+  const dispatch = useDispatch();
+  const { records, sum, totalCount, totalCancelledNoise, loading } = useSelector((state) => state);
+  // const [sum, setSum] = useState(0);
 
   useEffect(() => {
     const fetch = async () => {
       try {
+        dispatch(setLoading(true));
         base('Feature Analysis').select({view: 'Grid view'}).all().then(records => {
           let total = 0;
           const data = records.map((record, index) => {
@@ -34,12 +39,16 @@ const App = () => {
               Wireless: record.fields['Wireless'] ? "True" : "False"
             }
           });
-          
-          setRecords(data);
-          setSum(total);
+          dispatch(getRecords({
+            records: data,
+            sum: total,
+            totalCount: data.length,
+            totalCancelledNoise: (data.filter((record) => record.Noise === "False")).length
+          }));
+          dispatch(setLoading(false));
         });
       } catch (error) {
-        console.log(error);
+        dispatch(setLoading(false));
       }
     }
 
@@ -49,6 +58,20 @@ const App = () => {
   return (
     <div className="App">
       <Container>
+        <div className="airtable-summary d-flex align-items-center">
+          <div className="airtable-summary__item">
+            <p>Total Headphone</p>
+            <p>{totalCount}</p>
+          </div>
+          <div className="airtable-summary__item">
+            <p>Total Headphone Costs</p>
+            <p>${sum}</p>
+          </div>
+          <div className="airtable-summary__item">
+            <p>Total Noise Cancelling</p>
+            <p>{totalCancelledNoise}</p>
+          </div>
+        </div>
         <Table striped bordered hover>
           <thead>
             <tr>
@@ -83,13 +106,13 @@ const App = () => {
                 <td>{record.Wireless}</td>
               </tr>
             ))}
-            <tr>
-              <td colSpan={8}></td>
-              <td>Sum: ${sum}</td>
-              <td colSpan={3}></td>
-            </tr>
           </tbody>
         </Table>
+        {loading && (
+          <div className="spinner-wrapper">
+            <Spinner animation="border" variant="danger" />
+          </div>
+        )}
       </Container>
     </div>
   );

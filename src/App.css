@@ -1,3 +1,24 @@
 .App {
   padding: 100px;
 }
+
+.spinner-wrapper {
+  position: absolute;
+  top: calc(50vh - 20px);
+  left: calc(50vw - 20px);
+}
+
+.airtable-summary__item {
+  background-color: rgb(222, 226, 230);
+  padding: 10px 20px;
+  margin-right: 40px;
+  border-radius: 2px;
+  margin-bottom: 20px;
+}
+
+.airtable-summary__item p {
+  margin-bottom: 0;
+  font-size: 16px;
+  color: black;
+  font-weight: bold;
+}
